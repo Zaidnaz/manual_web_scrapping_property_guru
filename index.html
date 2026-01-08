@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manual Property Scraper</title>
+    <style>
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background: #1e1e2e; 
+            color: #fff; 
+            display: flex; 
+            justify-content: center; 
+            padding-top: 50px; 
+        }
+        .panel { 
+            background: #2b2b40; 
+            padding: 2.5rem; 
+            border-radius: 12px; 
+            width: 450px; 
+            text-align: center; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5); 
+        }
+        h2 { margin-top: 0; color: #a6accd; }
+        p { color: #94a3b8; margin-bottom: 25px; line-height: 1.5; }
+        
+        button {
+            width: 100%; 
+            padding: 16px; 
+            margin: 10px 0; 
+            border: none; 
+            border-radius: 8px;
+            font-size: 1.1rem; 
+            font-weight: bold; 
+            cursor: pointer; 
+            transition: 0.2s;
+        }
+
+        .btn-launch { background: #4caf50; color: white; }
+        .btn-launch:hover { background: #43a047; }
+
+        .btn-scrape { background: #3f51b5; color: white; }
+        .btn-scrape:hover { background: #303f9f; }
+        
+        .status { 
+            margin-top: 20px; 
+            padding: 15px; 
+            background: #181825; 
+            border-radius: 6px; 
+            min-height: 60px; 
+            font-family: monospace; 
+            font-size: 0.9rem; 
+            text-align: left;
+            white-space: pre-wrap;
+            color: #dcdcdc;
+            border: 1px solid #3b3b4f;
+        }
+        .success { color: #4ade80; }
+        .error { color: #f87171; }
+    </style>
+</head>
+<body>
+
+<div class="panel">
+    <h2>🕵️ Manual Property Scraper</h2>
+    <p>
+        1. Launch Browser.<br>
+        2. Navigate to a property page.<br>
+        3. Click "Scrape This Page".
+    </p>
+
+    <button type="button" class="btn-launch" onclick="launchBrowser()">🚀 Launch Browser</button>
+    <button type="button" class="btn-scrape" onclick="scrapeCurrent()">📥 Scrape This Page</button>
+
+    <div id="status" class="status">System Ready...</div>
+</div>
+
+<script>
+    const API_URL = "http://127.0.0.1:8000";
+    const statusDiv = document.getElementById('status');
+
+    async function launchBrowser() {
+        statusDiv.innerText = "Launching Chrome...";
+        statusDiv.className = "status";
+        try {
+            const res = await fetch(`${API_URL}/launch-browser`, { method: 'POST' });
+            const data = await res.json();
+            statusDiv.innerHTML = `<span class="success">✅ ${data.message}</span>`;
+        } catch (e) {
+            statusDiv.innerHTML = `<span class="error">❌ Error: ${e.message}</span>`;
+        }
+    }
+
+    async function scrapeCurrent() {
+        statusDiv.innerText = "⏳ Reading page & processing tokens...";
+        statusDiv.className = "status";
+        
+        try {
+            const res = await fetch(`${API_URL}/scrape-current-page`, { method: 'POST' });
+            
+            if(!res.ok) throw new Error("Backend Error (Check Terminal)");
+            
+            const result = await res.json();
+            const data = result.data;
+            
+            // Format nice output
+            let output = `<span class="success">✅ SAVED to CSV!</span>\n`;
+            output += `🏠 ${data.title ? data.title.substring(0, 35) + "..." : "No Title"}\n`;
+            output += `👤 ${data.agent_name} (${data.agent_phone})\n`;
+            output += `💰 ${data.price}`;
+
+            statusDiv.innerHTML = output;
+
+        } catch (e) {
+            statusDiv.innerHTML = `<span class="error">❌ Failed: ${e.message}</span>`;
+        }
+    }
+</script>
+
+</body>
+</html>
