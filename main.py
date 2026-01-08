@@ -13,7 +13,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
 # --- CONFIGURATION ---
-GOOGLE_API_KEY = "AIzaSyDw_5jKYDpQHpGWR_L5EsBWGXGvvb2P8Y0"
+GOOGLE_API_KEY = ""
 genai.configure(api_key=GOOGLE_API_KEY)
 model = genai.GenerativeModel('gemini-2.5-flash')
 
